@@ -1,3 +1,86 @@
+# Лабораторная работа. Базовая настройка коммутатора  
+
+## Топология:  
+![](screenshots/topology.png)  
+
+## Таблица адресации:  
+
+    | Device  | Interface | IP-address/prefix         |
+    | ------- | --------- | ------------------------- |
+    | SW1     | VLAN 1    | 192.168.1.13 ip address   |
+    |         |           | 255.255.255.0 mask        |
+    |         |           | 192.168.1.1 default route |
+    | ------- | --------- | ------------------------- | 
+    | PC-A    | NIC       | 192.168.1.10 ip address   |
+    |         |           | 255.255.255.0 mask        |
+    |         |           | 192.168.1.1 default route |  
+
+## Последовательность настройки коммутатора cisco 2960:  
+
+1. Задать имя сетевого устройства:  
+`enable`  
+`config terminal`  
+`hostname SW1`  
+
+2. Защита устройства и первичная настройка для возможности удаленного доступа:  
+`line con 0` (Защита консольного подключения)  
+`password cisco`  
+`login`    
+`end`  
+
+`configure terminal` (Защита рут режима)  
+`enable secret class`  
+`exit`  
+
+`configure terminal`  
+`line vty 0 4` (Добавляем 5 виртуальных терминалов с паролем для удаленного подлючения)  
+`password cisco`  
+`login`  
+`transport input telnet` (Включаем службу telnet на свиче)  
+`end`
+
+`configure terminal`  
+`service password-encryption` (Шифрование паролей - проверить можно командой show running-config)  
+`exit` 
+
+3. Баннер  
+`configure terminal`  
+`banner motd #`  
+	／＞  フ  
+         |  _ _|    
+        ／` ミ＿xノ    
+       /     |    
+      /  ヽ   ﾉ    
+      │  | | |    
+／￣|   | | |    
+(￣ヽ＿_ヽ_)__)    
+＼二)  
+`#`  
+
+4. Настройка виртуальго интерфейса коммутарора:  
+`configure terminal`  
+`interface vlan 1`  
+`ip address 192.168.1.13 255.255.255.0`    
+`ip default-gateway 192.168.1.1`    
+`no shutdown`  
+
+5. Общие настройки для удобства работы:  
+`configure terminal`  
+`no ip domain-lookup` (Маршрутизатор или коммутатор перестает отправлять запросы на разрешение имен в DNS-серверы)  
+`line con 0`  
+`logging synchronous` (Чтобы консольные сообщения не прерывали выполнение команд)   
+
+6. Сохранение текущей конфигурации в энергонезависимую память nvram в рут режиме:  
+`enable`  
+`copy running-config startup-config`  
+
+7. Удаление конфигурации сетевого устройства:  
+`enable`  
+`erase startup-config`  
+`reload`  
+
+## Ответы на вопросы из методички:
+
 ___a) Почему нужно использовать консольное подключение для первоначальной настройки коммутатора? Почему нельзя подключиться к коммутатору через Telnet или SSH?___  
 
 - **Потому что у сетевого устройства еще нет ip адреса, не настроен виртуальный терминал, не включены службы на коммутаторе telnet и ssh**  
@@ -103,7 +186,13 @@ ___3. Для чего нужна команда login?___
 ![](screenshots/ping.png)  
 
 > Проверка связанности оконечного устройства и сетевого устройства (telnet):   
-![](screenshots/telnet.png)  
+![](screenshots/telnet.png)
+
+> Эхо запрос и подключение по telnet:  
+![](screenshots/ping_telnet_new_ip.png)  
+
+> Мануальная конфигурация хоста:  
+![](screenshots/host_manual_config.png)    
 
 > Финальная конфигурация сетевого устройства 1:         
 ![](screenshots/config_1.png)  
